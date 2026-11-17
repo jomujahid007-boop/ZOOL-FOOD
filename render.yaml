@@ -2,6 +2,7 @@ services:
   - type: web
     name: zol-food-api
     runtime: node
+    plan: free
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
@@ -15,6 +16,9 @@ services:
         generateValue: true
       - key: PAYMENT_WEBHOOK_SECRET
         generateValue: true
+      - key: SEED_DEMO
+        value: "true"
 databases:
   - name: zol-food-db
+    plan: free
     databaseName: zolfood
