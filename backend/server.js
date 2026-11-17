@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import pg from 'pg';
+import fs from 'fs';
 import admin from 'firebase-admin';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
@@ -326,4 +327,14 @@ app.get('/admin/audit', A, wrap(async (req, res) => {
 
 app.use(express.static('public'));
 
-app.listen(process.env.PORT || 3000, () => console.log('ZOL FOOD API up'));
+// First start on an empty database: create tables automatically (no manual SQL step).
+async function bootstrap() {
+  const { rows } = await pool.query("SELECT to_regclass('public.users') AS t");
+  if (rows[0].t) return;
+  const run = f => pool.query(fs.readFileSync(new URL(f, import.meta.url), 'utf8'));
+  await run('./schema.sql'); await run('./migration_002.sql');
+  if (process.env.SEED_DEMO === 'true') await run('./seed.sql');
+  console.log('database initialised');
+}
+bootstrap().then(() => app.listen(process.env.PORT || 3000, () => console.log('ZOL FOOD API up')))
+  .catch(e => { console.error('startup failed', e); process.exit(1); });
