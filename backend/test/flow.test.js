@@ -45,7 +45,7 @@ before(async () => {
   ids.r1 = await rest(owner1, 'مطعم أ', true, 5000); ids.r2 = await rest(owner2, 'مطعم ب', true, 0); ids.r3 = await rest(owner1, 'مطعم مخفي', false, 0);
   const item = async (r, n, price, avail = true) => (await row('INSERT INTO menu_items(restaurant_id,name,price,is_available) VALUES($1,$2,$3,$4) RETURNING id', [r, n, price, avail])).id;
   ids.i1 = await item(ids.r1, 'فتة', 9000); ids.i2 = await item(ids.r1, 'بطاطس', 4000); ids.i3 = await item(ids.r1, 'نفدت', 5000, false); ids.i4 = await item(ids.r2, 'برجر', 8000);
-  srv = spawn('node', ['server.js'], { env: { ...process.env, PORT, JWT_SECRET: 'test-secret', PAYMENT_WEBHOOK_SECRET: WH_SECRET, OTP_LIMIT: '1000', GLOBAL_LIMIT: '100000', GOOGLE_APPLICATION_CREDENTIALS: '' }, stdio: 'inherit' });
+  srv = spawn('node', ['server.js'], { env: { ...process.env, PORT, JWT_SECRET: 'test-secret', PAYMENT_WEBHOOK_SECRET: WH_SECRET, OTP_LIMIT: '1000', GLOBAL_LIMIT: '100000', GOOGLE_APPLICATION_CREDENTIALS: '', SEED_DEMO: 'false' }, stdio: 'inherit' });
   assert.ok(await until(async () => { try { return (await call('GET', '/restaurants')).status === 200; } catch { return false; } }, 10000), 'server did not start');
   T.owner1 = await login('+249911000001'); T.owner2 = await login('+249911000002');
   T.c1 = await login('+249911000011'); T.c2 = await login('+249911000012'); T.c3 = await login('+249911000013');
