@@ -1,22 +1,30 @@
 <!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>زول فود</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="only light"><meta name="theme-color" content="#0F4D3A">
+<title>زول فود | ZOL FOOD</title><link rel="icon" href="/logo.svg">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--g:#0F4D3A;--gold:#C9A24B;--bg:#FAF6EC;--c:#fff;--tx:#1B1B1A;--mu:#6b6b63;--ln:#e8e1cf}
-@media(prefers-color-scheme:dark){:root{--bg:#121513;--c:#1c211e;--tx:#f3efe3;--mu:#a5a597;--ln:#2c332f;--g:#1d7a5c}}
+:root{color-scheme:only light;--g:#0F4D3A;--gold:#C9A24B;--bg:#FAF6EC;--c:#fff;--tx:#1B1B1A;--mu:#6b6b63;--ln:#e8e1cf}
 *{box-sizing:border-box;margin:0}body{font-family:Tajawal,Tahoma,Arial,sans-serif;background:var(--bg);color:var(--tx);max-width:520px;margin:auto;padding-bottom:90px}
-header{background:var(--g);color:#fff;padding:14px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:20px}header a{color:var(--gold);font-weight:400;font-size:14px;text-decoration:none}
+header{position:sticky;top:0;z-index:5;background:var(--g);color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px;line-height:1.1;cursor:pointer}.brand small{display:block;color:var(--gold);font-weight:500;font-size:11px}
+header a{color:var(--gold);font-size:14px;text-decoration:none;font-weight:700}
 main{padding:14px}.card{background:var(--c);border:1px solid var(--ln);border-radius:14px;padding:12px;margin-bottom:10px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.mu{color:var(--mu);font-size:13px}
 button{border:0;border-radius:10px;padding:10px 14px;background:var(--g);color:#fff;font:inherit;font-weight:700;cursor:pointer}button.g{background:var(--gold);color:#1B1B1A}button.o{background:none;color:var(--g);border:1px solid var(--g)}button.f{width:100%;margin-top:8px;padding:13px}
-input[type=text],input[type=tel],input:not([type]){width:100%;padding:12px;border-radius:10px;border:1px solid var(--ln);background:var(--c);color:var(--tx);font:inherit;margin:6px 0}
-.tag{font-size:12px;padding:2px 8px;border-radius:8px;border:1px solid var(--ln)}h2{font-size:18px;margin:12px 0 8px}
+input[type=text],input[type=tel],input[type=search]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--ln);background:var(--c);color:var(--tx);font:inherit;margin:6px 0}
+.tag{font-size:12px;padding:2px 8px;border-radius:8px;border:1px solid var(--ln);white-space:nowrap}h2{font-size:18px;margin:14px 0 8px}
 .err{background:#fdecea;color:#b3402f;border-radius:10px;padding:10px;margin-bottom:10px}
 .empty{text-align:center;color:var(--mu);padding:30px 10px}
+.banner{background:var(--g);color:#fff;border-radius:16px;padding:16px;margin-bottom:12px;border-inline-start:6px solid var(--gold)}.banner b{font-size:18px;display:block;margin-bottom:2px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0}.chip{flex:none;background:var(--c);color:var(--tx);border:1px solid var(--ln);border-radius:20px;padding:6px 14px;font-weight:500}.chip.on{background:var(--g);color:#fff;border-color:var(--g)}
+.rest{display:flex;gap:12px;align-items:center;cursor:pointer}.em{width:58px;height:58px;border-radius:12px;background:var(--bg);display:grid;place-items:center;font-size:30px;flex:none}
+.qty{display:flex;align-items:center;gap:10px}.qty button{padding:6px 12px}
 .step{display:flex;gap:10px;align-items:center;padding:6px 0;color:var(--mu)}.step i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ln);flex:none}
 .step.done{color:var(--tx)}.step.done i{background:var(--g);border-color:var(--g)}.step.cur{color:var(--g);font-weight:700}.step.cur i{background:var(--gold);border-color:var(--gold)}
 .bar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:auto;padding:10px 14px;background:var(--bg);border-top:1px solid var(--ln)}
 </style></head><body>
-<header><span>زول فود</span><a href="#" id="out"></a></header>
+<header><div class="brand" onclick="goHome()"><svg width="38" height="38" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><circle cx="24" cy="24" r="23" fill="#0F4D3A" stroke="#C9A24B" stroke-width="2"/><path d="M10 31a14 14 0 0 1 28 0z" fill="#C9A24B"/><rect x="8" y="32" width="32" height="3.2" rx="1.6" fill="#C9A24B"/><circle cx="24" cy="14.5" r="2.3" fill="#C9A24B"/><path d="M19.5 22h9l-9 6.5h9" fill="none" stroke="#0F4D3A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg><span>زول فود<small>من مطعمك لبابك… بكل سهولة</small></span></div><a href="#" id="out"></a></header>
 <main id="m"><p class="empty">جاري التحميل...</p></main>
 <div id="bar"></div>
 <script>
@@ -25,8 +33,10 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const f=n=>Number(n||0).toLocaleString('ar-EG')+' ج';
 const ST={new:'تم استلام الطلب',accepted:'المطعم أكّد الطلب',preparing:'جاري التجهيز',ready:'الطعام جاهز',picked_up:'المندوب في الطريق',delivered:'تم التسليم',cancelled:'ملغي'};
 const FLOW=['new','accepted','preparing','ready','picked_up','delivered'];
-const E={invalid_phone:'رقم الهاتف غير صحيح (مثال: +249912345678)',otp_wrong:'الرمز غير صحيح',otp_expired:'انتهت صلاحية الرمز، اطلب رمزاً جديداً',insufficient_balance:'رصيد المحفظة لا يكفي',restaurant_unavailable:'المطعم غير متاح الآن',below_min_order:'الطلب أقل من الحد الأدنى',suspended:'هذا الحساب موقوف',courier_not_approved:'حسابك قيد المراجعة',not_your_order:'الطلب مع مندوب آخر',invalid_transition:'تغيّرت حالة الطلب، حدّث الصفحة',network:'تعذّر الاتصال بالخادم. تأكد من الإنترنت وحاول مجدداً',forbidden:'غير مسموح لهذا الحساب'};
-const S={tok:null,role:null,view:'home',rests:null,menu:null,rid:null,cart:{},cur:null,ords:null,rows:null,cour:null,adm:null,err:'',step:'phone',phone:'',pay:'cash',addr:'',busy:false};
+const EM={'سوداني':'🍲','مشويات':'🍖','بيتزا':'🍕','برجر':'🍔','قهوة':'☕','شاورما':'🌯','حلويات':'🍰','مخابز':'🥖','دجاج':'🍗'};
+const emoji=c=>EM[c]||'🍽️';
+const E={invalid_phone:'رقم الهاتف غير صحيح (مثال: +249912345678)',otp_wrong:'الرمز غير صحيح',otp_expired:'انتهت صلاحية الرمز، اطلب رمزاً جديداً',insufficient_balance:'رصيد المحفظة لا يكفي',restaurant_unavailable:'المطعم مغلق أو غير متاح الآن',below_min_order:'الطلب أقل من الحد الأدنى',suspended:'هذا الحساب موقوف',courier_not_approved:'حسابك قيد المراجعة',not_your_order:'الطلب مع مندوب آخر',invalid_transition:'تغيّرت حالة الطلب، حدّث الصفحة',network:'تعذّر الاتصال بالخادم. تأكد من الإنترنت وحاول مجدداً',forbidden:'غير مسموح لهذا الحساب',addr:'اكتب عنوان التوصيل'};
+const S={tok:null,role:null,view:'home',rests:null,cats:['الكل'],cat:'الكل',q:'',menu:null,rid:null,cart:{},cur:null,ords:null,rows:null,cour:null,adm:null,err:'',step:'phone',phone:'',pay:'cash',addr:'',busy:false,next:null,cfg:{deliveryFee:2000,serviceFee:500}};
 try{S.tok=localStorage.getItem('t');S.role=localStorage.getItem('r')}catch(e){}
 
 async function api(p,m,b){
@@ -37,20 +47,20 @@ async function api(p,m,b){
   if(r.status===401&&S.tok){logout();throw new Error('unauthorized')}
   if(!r.ok)throw new Error(j.error||'error');
   return j}
-function logout(){S.tok=S.role=null;S.step='phone';S.view='home';S.rests=S.ords=S.rows=S.cour=S.adm=null;try{localStorage.clear()}catch(e){}draw()}
-$('#out').onclick=e=>{e.preventDefault();logout()};
+function logout(){S.tok=S.role=null;S.step='phone';S.view='home';S.cart={};S.rests=S.ords=S.rows=S.cour=S.adm=null;try{localStorage.clear()}catch(e){}load()}
+$('#out').onclick=e=>{e.preventDefault();if(S.tok)logout();else{S.view='login';S.step='phone';S.err='';draw()}};
+function goHome(){S.err='';S.view='home';load()}
 async function run(fn){
   if(S.busy)return;S.busy=true;S.err='';
   try{await fn()}catch(e){S.err=E[e.message]||'تعذّر تنفيذ العملية، حاول مرة أخرى'}
   S.busy=false;draw()}
 
 async function load(){
-  if(!S.tok)return draw();
   try{
-    if(S.role==='customer'){
+    if(!S.tok||S.role==='customer'){
       if(S.view==='home')S.rests=await api('/restaurants');
-      else if(S.view==='orders')S.ords=await api('/orders/mine');
-      else if(S.view==='track'&&S.cur)S.cur=await api('/orders/'+S.cur.id);
+      else if(S.tok&&S.view==='orders')S.ords=await api('/orders/mine');
+      else if(S.tok&&S.view==='track'&&S.cur)S.cur=await api('/orders/'+S.cur.id);
     }else if(S.role==='restaurant')S.rows=await api('/restaurant/orders');
     else if(S.role==='courier')S.cour={a:await api('/courier/available'),m:await api('/courier/mine')};
     else if(S.role==='admin')S.adm=await api('/admin/stats');
@@ -62,12 +72,13 @@ async function load(){
 function otp(){S.phone=($('#ph').value||'').trim();run(async()=>{await api('/auth/otp','POST',{phone:S.phone});S.step='code'})}
 function verify(){run(async()=>{
   const j=await api('/auth/verify','POST',{phone:S.phone,code:($('#cd').value||'').trim()});
-  S.tok=j.token;S.role=j.role;S.view='home';try{localStorage.setItem('t',S.tok);localStorage.setItem('r',S.role)}catch(e){}
+  S.tok=j.token;S.role=j.role;try{localStorage.setItem('t',S.tok);localStorage.setItem('r',S.role)}catch(e){}
+  S.view=(S.role==='customer'&&S.next==='cart'&&count()>0)?'cart':'home';S.next=null;
   await load()})}
 function rLogin(){
-  return '<h2>تسجيل الدخول</h2><div class="card">'+(S.step==='phone'
+  return '<h2>تسجيل الدخول</h2>'+(S.next?'<p class="mu" style="margin-bottom:8px">سجّل دخولك لإتمام طلبك، وسلتك محفوظة.</p>':'')+'<div class="card">'+(S.step==='phone'
    ?'<div class="mu">اكتب رقم هاتفك بصيغة دولية</div><input id="ph" type="tel" placeholder="+249912345678" value="'+esc(S.phone)+'"><button class="f" onclick="otp()">إرسال الرمز</button>'
-   :'<div class="mu">أرسلنا رمزاً إلى '+esc(S.phone)+'</div><input id="cd" type="tel" placeholder="رمز التحقق" inputmode="numeric"><button class="f" onclick="verify()">دخول</button><button class="o f" onclick="S.step=\'phone\';draw()">تغيير الرقم</button><p class="mu" style="margin-top:8px">وضع التجربة: الرمز يظهر في تبويب Logs في Render لأن خدمة الرسائل غير مربوطة بعد.</p>')+'</div>'}
+   :'<div class="mu">أرسلنا رمزاً إلى '+esc(S.phone)+'</div><input id="cd" type="tel" placeholder="رمز التحقق" inputmode="numeric"><button class="f" onclick="verify()">دخول</button><button class="o f" onclick="S.step=\'phone\';draw()">تغيير الرقم</button><p class="mu" style="margin-top:8px">وضع التجربة: الرمز يظهر في تبويب Logs في Render لأن خدمة الرسائل غير مربوطة بعد.</p>')+'</div><button class="o f" onclick="goHome()">تصفح المطاعم</button>'}
 
 /* ---- customer ---- */
 const total=()=>(S.menu||[]).reduce((a,m)=>a+m.price*(S.cart[m.id]||0),0);
@@ -75,28 +86,49 @@ const count=()=>Object.values(S.cart).reduce((a,b)=>a+b,0);
 function nav(v){S.view=v;S.err='';load()}
 function openRest(id){run(async()=>{if(S.rid!==id)S.cart={};S.menu=await api('/restaurants/'+id+'/menu');S.rid=id;S.view='menu'})}
 function add(id,d){S.cart[id]=(S.cart[id]||0)+d;if(S.cart[id]<=0)delete S.cart[id];draw()}
-function place(){run(async()=>{
-  if(!S.addr.trim())throw new Error('addr');
-  const items=Object.keys(S.cart).map(id=>({itemId:+id,qty:S.cart[id]}));
-  const key=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random();
-  const j=await api('/orders','POST',{restaurantId:S.rid,items,address:S.addr,payMethod:S.pay,idemKey:key});
-  S.cart={};S.cur=await api('/orders/'+j.orderId);S.view='track'})}
-E.addr='اكتب عنوان التوصيل';
+function setCat(i){S.cat=S.cats[i]||'الكل';draw()}
+function listHtml(){
+  const q=S.q.trim();
+  const l=(S.rests||[]).filter(r=>(S.cat==='الكل'||r.category===S.cat)&&(!q||(r.name+' '+(r.category||'')).includes(q)));
+  return l.map(r=>'<div class="card rest" onclick="openRest('+r.id+')"><div class="em">'+emoji(r.category)+'</div><div style="flex:1"><b>'+esc(r.name)+'</b><div class="mu">'+esc(r.category)+' · ★ '+esc(r.rating)+'</div><div class="mu">'+esc(r.prep_minutes)+' دقيقة · توصيل '+f(S.cfg.deliveryFee)+' · '+(r.is_open?'مفتوح الآن':'مغلق')+'</div></div></div>').join('')
+   ||'<p class="empty">'+((S.rests||[]).length?'لا توجد نتائج مطابقة.':'لا توجد مطاعم متاحة بعد. المطاعم تظهر بعد اعتمادها من الإدارة.')+'</p>'}
+function drawList(){const e=$('#list');if(e)e.innerHTML=listHtml()}
+function toCart(){S.view='cart';draw()}
+function place(){
+  if(!S.tok){S.next='cart';S.view='login';S.step='phone';S.err='';draw();return}
+  run(async()=>{
+    if(!S.addr.trim())throw new Error('addr');
+    const items=Object.keys(S.cart).map(id=>({itemId:+id,qty:S.cart[id]}));
+    const key=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random();
+    const j=await api('/orders','POST',{restaurantId:S.rid,items,address:S.addr,payMethod:S.pay,idemKey:key});
+    S.cart={};S.cur=await api('/orders/'+j.orderId);S.view='track'})}
 function rCust(){
-  const v=S.view;
+  let v=S.view;
+  if(!S.tok&&(v==='orders'||v==='track'))v='home';
   if(v==='menu'){
     if(!S.menu)return '<p class="empty">جاري التحميل...</p>';
-    return '<button class="o" onclick="nav(\'home\')">رجوع للمطاعم</button><h2>القائمة</h2>'+
-     (S.menu.map(m=>'<div class="card row"><div><b>'+esc(m.name)+'</b><div class="mu">'+f(m.price)+'</div></div><div class="row">'+(S.cart[m.id]?'<button class="o" onclick="add('+m.id+',-1)">−</button><b>'+S.cart[m.id]+'</b>':'')+'<button onclick="add('+m.id+',1)">+</button></div></div>').join('')||'<p class="empty">لا توجد أصناف في هذا المطعم بعد.</p>')}
-  if(v==='cart')return '<h2>تأكيد الطلب</h2><div class="card"><div class="row"><span>المنتجات</span><b>'+f(total())+'</b></div><div class="mu">رسوم التوصيل والخدمة يحسبها الخادم وتظهر بعد التأكيد</div></div><div class="card"><div class="mu">عنوان التوصيل</div><input type="text" id="ad" placeholder="مثال: أمدرمان، الموردة، قرب الصيدلية" value="'+esc(S.addr)+'" oninput="S.addr=this.value"><label style="display:block;padding:6px 0"><input type="radio" name="p" '+(S.pay==='cash'?'checked':'')+' onchange="S.pay=\'cash\'"> الدفع عند الاستلام</label><label style="display:block;padding:6px 0"><input type="radio" name="p" '+(S.pay==='wallet'?'checked':'')+' onchange="S.pay=\'wallet\'"> المحفظة</label></div><button class="g f" onclick="place()">تأكيد الطلب</button><button class="o f" onclick="S.view=\'menu\';draw()">رجوع</button>';
+    const r=(S.rests||[]).find(x=>x.id===S.rid);
+    return '<button class="o" onclick="goHome()">رجوع للمطاعم</button>'+(r?'<div class="card rest" style="margin-top:10px;cursor:default"><div class="em">'+emoji(r.category)+'</div><div><b>'+esc(r.name)+'</b><div class="mu">'+esc(r.category)+' · ★ '+esc(r.rating)+'</div><div class="mu">'+esc(r.prep_minutes)+' دقيقة · توصيل '+f(S.cfg.deliveryFee)+' · '+(r.is_open?'مفتوح الآن':'مغلق')+'</div></div></div>':'')+'<h2>القائمة</h2>'+
+     (S.menu.map(m=>'<div class="card row"><div><b>'+esc(m.name)+'</b><div class="mu">'+f(m.price)+'</div></div><div class="qty">'+(S.cart[m.id]?'<button class="o" onclick="add('+m.id+',-1)">−</button><b>'+S.cart[m.id]+'</b>':'')+'<button onclick="add('+m.id+',1)">+</button></div></div>').join('')||'<p class="empty">لا توجد أصناف في هذا المطعم بعد.</p>')}
+  if(v==='cart'){
+    if(!count())return '<h2>السلة</h2><p class="empty">السلة فارغة. اختر وجبة من أحد المطاعم.</p><button class="f" onclick="goHome()">تصفح المطاعم</button>';
+    const sub=total(),fee=S.cfg.deliveryFee,svc=S.cfg.serviceFee;
+    return '<h2>السلة</h2><div class="card">'+S.menu.filter(m=>S.cart[m.id]).map(m=>'<div class="row" style="padding:6px 0"><div>'+esc(m.name)+'<div class="mu">'+f(m.price)+'</div></div><div class="qty"><button class="o" onclick="add('+m.id+',-1)">−</button><b>'+S.cart[m.id]+'</b><button onclick="add('+m.id+',1)">+</button></div></div>').join('')+'</div>'+
+     '<div class="card"><div class="row"><span>المنتجات</span><span>'+f(sub)+'</span></div><div class="row"><span>رسوم التوصيل</span><span>'+f(fee)+'</span></div><div class="row"><span>رسوم الخدمة</span><span>'+f(svc)+'</span></div><div class="row"><b>الإجمالي</b><b>'+f(sub+fee+svc)+'</b></div></div>'+
+     '<div class="card"><div class="mu">عنوان التوصيل</div><input type="text" id="ad" placeholder="مثال: أمدرمان، الموردة، قرب الصيدلية" value="'+esc(S.addr)+'" oninput="S.addr=this.value"><label style="display:block;padding:6px 0"><input type="radio" name="p" '+(S.pay==='cash'?'checked':'')+' onchange="S.pay=\'cash\'"> الدفع عند الاستلام</label><label style="display:block;padding:6px 0"><input type="radio" name="p" '+(S.pay==='wallet'?'checked':'')+' onchange="S.pay=\'wallet\'"> المحفظة</label></div>'+
+     '<button class="g f" onclick="place()">'+(S.tok?'تأكيد الطلب':'سجّل الدخول وأكّد الطلب')+'</button><button class="o f" onclick="S.view=\'menu\';draw()">رجوع للقائمة</button>'}
   if(v==='track'){
     const o=S.cur;if(!o||!o.status)return '<p class="empty">جاري التحميل...</p>';
     const i=FLOW.indexOf(o.status);
-    return '<h2>طلب #'+esc(o.id)+'</h2><div class="card">'+(o.status==='cancelled'?'<b>تم إلغاء الطلب</b>':FLOW.map((s,k)=>'<div class="step '+(k<i||o.status==='delivered'?'done':k===i?'cur':'')+'"><i></i>'+ST[s]+'</div>').join(''))+'</div><div class="card">'+(o.items||[]).map(x=>'<div class="row mu"><span>'+x.qty+'× '+esc(x.name)+'</span><span>'+f(x.unit_price*x.qty)+'</span></div>').join('')+'<div class="row"><span>التوصيل والخدمة</span><span>'+f((o.delivery_fee||0)+(o.service_fee||0))+'</span></div><div class="row"><b>الإجمالي</b><b>'+f(o.total)+'</b></div><div class="mu">الدفع: '+(o.pay_method==='cash'?'عند الاستلام':'المحفظة')+'</div></div><button class="f" onclick="nav(\'home\')">الرئيسية</button>'}
-  if(v==='orders')return '<button class="o" onclick="nav(\'home\')">رجوع</button><h2>طلباتي</h2>'+(S.ords===null?'<p class="empty">جاري التحميل...</p>':S.ords.map(o=>'<div class="card row" style="cursor:pointer" onclick="S.cur={id:'+o.id+'};nav(\'track\')"><b>#'+o.id+'</b><span class="tag">'+ST[o.status]+'</span><span>'+f(o.total)+'</span></div>').join('')||'<p class="empty">لا توجد طلبات بعد.</p>');
+    return '<h2>تتبع الطلب #'+esc(o.id)+'</h2><div class="card">'+(o.status==='cancelled'?'<b>تم إلغاء الطلب</b>':FLOW.map((s,k)=>'<div class="step '+(k<i||o.status==='delivered'?'done':k===i?'cur':'')+'"><i></i>'+ST[s]+'</div>').join(''))+'</div><div class="card">'+(o.items||[]).map(x=>'<div class="row mu"><span>'+x.qty+'× '+esc(x.name)+'</span><span>'+f(x.unit_price*x.qty)+'</span></div>').join('')+'<div class="row"><span>التوصيل والخدمة</span><span>'+f((o.delivery_fee||0)+(o.service_fee||0))+'</span></div><div class="row"><b>الإجمالي</b><b>'+f(o.total)+'</b></div><div class="mu">الدفع: '+(o.pay_method==='cash'?'عند الاستلام':'المحفظة')+'</div></div><button class="f" onclick="goHome()">الرئيسية</button>'}
+  if(v==='orders')return '<button class="o" onclick="goHome()">رجوع</button><h2>طلباتي</h2>'+(S.ords===null?'<p class="empty">جاري التحميل...</p>':S.ords.map(o=>'<div class="card row" style="cursor:pointer" onclick="S.cur={id:'+o.id+'};nav(\'track\')"><b>#'+o.id+'</b><span class="tag">'+ST[o.status]+'</span><span>'+f(o.total)+'</span></div>').join('')||'<p class="empty">لا توجد طلبات بعد.</p>');
   // home
   if(S.rests===null)return '<p class="empty">جاري التحميل...</p>';
-  return '<h2>المطاعم</h2>'+(S.rests.map(r=>'<div class="card" style="cursor:pointer" onclick="openRest('+r.id+')"><b>'+esc(r.name)+'</b><div class="mu">'+esc(r.category)+' · ★ '+esc(r.rating)+' · '+esc(r.prep_minutes)+' دقيقة</div></div>').join('')||'<p class="empty">لا توجد مطاعم متاحة بعد. المطاعم تظهر بعد اعتمادها من الإدارة.</p>')+'<button class="o f" onclick="nav(\'orders\')">طلباتي</button>'}
+  S.cats=['الكل'].concat(Array.from(new Set(S.rests.map(r=>r.category).filter(Boolean))));
+  return '<div class="banner"><b>اطلب من مطاعمك المفضلة</b>وتوصيل لحدّ بابك، في كل مكان في السودان</div>'+
+   '<input type="search" id="q" placeholder="ابحث عن مطعم أو نوع طعام" value="'+esc(S.q)+'" oninput="S.q=this.value;drawList()">'+
+   '<div class="chips">'+S.cats.map((c,i)=>'<button class="chip '+(S.cat===c?'on':'')+'" onclick="setCat('+i+')">'+esc(c)+'</button>').join('')+'</div>'+
+   '<h2>المطاعم</h2><div id="list">'+listHtml()+'</div>'+(S.tok?'<button class="o f" onclick="nav(\'orders\')">طلباتي</button>':'')}
 
 /* ---- restaurant / courier / admin ---- */
 function st(id,s){run(async()=>{await api('/orders/'+id+'/status','POST',{status:s});await load()})}
@@ -113,14 +145,15 @@ function rAdmin(){
   return '<h2>الإدارة</h2><div class="card">الطلبات: <b>'+d.orders+'</b></div><div class="card">المبيعات: <b>'+f(d.sales)+'</b></div><div class="card">إيرادات المنصة: <b>'+f(d.revenue)+'</b></div><div class="card">معدل الإلغاء: <b>'+d.cancel_rate+'%</b></div><a href="/admin.html"><button class="f">فتح لوحة الإدارة الكاملة</button></a>'}
 
 function draw(){
-  $('#out').textContent=S.tok?'خروج':'';
+  $('#out').textContent=S.tok?'خروج':(S.view==='login'?'':'دخول');
   let h;
   try{
-    h=!S.tok?rLogin():S.role==='customer'?rCust():S.role==='restaurant'?rRest():S.role==='courier'?rCour():rAdmin();
-  }catch(e){h='<p class="empty">حدث خطأ في عرض الصفحة. اضغط خروج ثم ادخل من جديد.</p>';console.error(e)}
+    h=(S.view==='login'&&!S.tok)?rLogin():(!S.tok||S.role==='customer')?rCust():S.role==='restaurant'?rRest():S.role==='courier'?rCour():rAdmin();
+  }catch(e){h='<p class="empty">حدث خطأ في عرض الصفحة. أعد تحميل الصفحة.</p>';console.error(e)}
   $('#m').innerHTML=(S.err?'<div class="err">'+esc(S.err)+'</div>':'')+h;
-  $('#bar').innerHTML=(S.tok&&S.role==='customer'&&S.view==='menu'&&count()>0)?'<div class="bar"><button class="g f" style="margin:0" onclick="S.view=\'cart\';draw()">عرض السلة ('+count()+') · '+f(total())+'</button></div>':''}
+  $('#bar').innerHTML=((!S.tok||S.role==='customer')&&S.view==='menu'&&count()>0)?'<div class="bar"><button class="g f" style="margin:0" onclick="toCart()">عرض السلة ('+count()+') · '+f(total())+'</button></div>':''}
 
-setInterval(()=>{if(S.tok&&!S.busy&&S.view!=='menu'&&S.view!=='cart')load()},5000);
+setInterval(()=>{if(S.tok&&!S.busy&&(S.role!=='customer'||S.view==='track'||S.view==='orders'))load()},5000);
+api('/config').then(c=>{S.cfg=c;draw()}).catch(()=>{});
 load();
 </script></body></html>
