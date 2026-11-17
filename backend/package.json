@@ -1,0 +1,2 @@
+{"name":"zol-food-api","version":"0.1.0","type":"module","scripts":{"start":"node server.js","test":"node --test test/flow.test.js","db":"psql $DATABASE_URL -f schema.sql"},
+"dependencies":{"express":"^4.19.2","pg":"^8.12.0","jsonwebtoken":"^9.0.2","helmet":"^7.1.0","express-rate-limit":"^7.4.0","cors":"^2.8.5","firebase-admin":"^12.3.0"}}

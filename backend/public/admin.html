@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>زول فود | الإدارة</title>
+<style>
+:root{--g:#0F4D3A;--gold:#C9A24B;--bg:#FAF6EC;--c:#fff;--tx:#1B1B1A;--mu:#6b6b63;--ln:#e8e1cf}
+@media(prefers-color-scheme:dark){:root{--bg:#121513;--c:#1c211e;--tx:#f3efe3;--mu:#a5a597;--ln:#2c332f;--g:#1d7a5c}}
+*{box-sizing:border-box;margin:0}body{font-family:Tajawal,Tahoma,sans-serif;background:var(--bg);color:var(--tx);max-width:900px;margin:auto}
+header{background:var(--g);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:800}header a{color:var(--gold);font-weight:400;font-size:13px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 14px}nav button{flex:none;border:1px solid var(--ln);background:var(--c);color:var(--tx);border-radius:20px;padding:7px 14px;font:inherit;font-size:13px}nav button.on{background:var(--g);color:#fff;border-color:var(--g)}
+main{padding:0 14px 40px}.card{background:var(--c);border:1px solid var(--ln);border-radius:12px;padding:12px;margin-bottom:8px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.mu{color:var(--mu);font-size:13px}
+button.b{border:0;border-radius:8px;padding:7px 12px;background:var(--g);color:#fff;font:inherit;font-weight:700;font-size:13px}button.b.r{background:#b3402f}button.b.o{background:none;color:var(--g);border:1px solid var(--g)}
+input,select{padding:9px;border-radius:8px;border:1px solid var(--ln);background:var(--c);color:var(--tx);font:inherit;max-width:100%}
+.tag{font-size:12px;padding:2px 8px;border-radius:8px;border:1px solid var(--ln)}.ok{color:#1a7f4b}.no{color:#b3402f}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.stat b{display:block;font-size:22px;color:var(--g)}
+.err{color:#b3402f;margin:8px 0}h2{font-size:17px;margin:10px 0}
+</style></head><body>
+<header><span>زول فود · الإدارة</span><a href="#" id="out"></a></header>
+<nav id="nav"></nav><main id="m"></main>
+<script>
+let tok=null,tab='stats',err='',step='phone',phone='',st='';
+try{tok=localStorage.getItem('at')}catch{}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f=n=>Number(n||0).toLocaleString('ar-EG')+' ج',$=s=>document.querySelector(s);
+const ST={new:'جديد',accepted:'مقبول',preparing:'قيد التجهيز',ready:'جاهز',picked_up:'في الطريق',delivered:'مُسلَّم',cancelled:'ملغي'};
+const E={invalid_commission:'العمولة لازم تكون بين 0 و50',invalid_code:'الكود: حروف إنجليزية كبيرة وأرقام (3-20)',pct_or_amount:'حدد نسبة أو مبلغاً (واحد فقط)',invalid_transition:'لا يمكن إلغاء الطلب في حالته الحالية',invalid_fee:'رسوم غير صحيحة',otp_wrong:'الرمز غير صحيح',otp_expired:'انتهت صلاحية الرمز',forbidden:'هذا الحساب ليس حساب إدارة'};
+const TABS={stats:'الملخص',restaurants:'المطاعم',couriers:'المندوبون',orders:'الطلبات',users:'المستخدمون',coupons:'الكوبونات',cities:'المدن والتوصيل',audit:'السجل'};
+async function api(p,m='GET',b){const r=await fetch(p,{method:m,headers:{'Content-Type':'application/json',...(tok?{Authorization:'Bearer '+tok}:{})},body:b?JSON.stringify(b):undefined});
+ const j=await r.json().catch(()=>({}));if(r.status==401){logout();throw 0}if(!r.ok){err=E[j.error]||j.error||'خطأ';throw new Error(err)}return j}
+function logout(){tok=null;try{localStorage.removeItem('at')}catch{}step='phone';draw('')}
+$('#out').onclick=e=>{e.preventDefault();logout()};
+const act=async(fn)=>{try{err='';await fn();await show()}catch(e){if(e)draw(body)}};
+async function otp(){phone=$('#ph').value;await act0(async()=>{await api('/auth/otp','POST',{phone});step='code'})}
+async function verify(){await act0(async()=>{const j=await api('/auth/verify','POST',{phone,code:$('#cd').value});if(j.role!='admin'){err=E.forbidden;return}tok=j.token;try{localStorage.setItem('at',tok)}catch{}await show();return 1})}
+async function act0(fn){try{err='';const r=await fn();if(!tok||!r)draw('')}catch(e){draw('')}}
+let body='';
+function draw(h){body=h;$('#out').textContent=tok?'خروج':'';
+ $('#nav').innerHTML=tok?Object.entries(TABS).map(([k,t])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';show()">${t}</button>`).join(''):'';
+ let x=h;if(!tok)x=`<h2>دخول الإدارة</h2>`+(step=='phone'?`<input id="ph" placeholder="رقم الهاتف +249..." inputmode="tel"> <button class="b" onclick="otp()">إرسال الرمز</button>`:`<input id="cd" placeholder="رمز التحقق" inputmode="numeric"> <button class="b" onclick="verify()">دخول</button>`);
+ $('#m').innerHTML=(err?`<p class="err">${esc(err)}</p>`:'')+x}
+const yn=v=>v?'<span class="ok">نعم</span>':'<span class="no">لا</span>';
+async function show(){
+ if(!tok)return draw('');
+ try{let h='';
+ if(tab=='stats'){const d=await api('/admin/stats');h=`<h2>الملخص</h2><div class="stat"><div class="card"><b>${d.orders}</b>إجمالي الطلبات</div><div class="card"><b>${f(d.sales)}</b>قيمة المبيعات</div><div class="card"><b>${f(d.revenue)}</b>إيرادات المنصة</div><div class="card"><b>${d.cancel_rate}%</b>معدل الإلغاء</div></div>`}
+ if(tab=='restaurants'){const d=await api('/admin/restaurants');h=`<h2>المطاعم</h2>`+d.map(r=>`<div class="card row"><div><b>${esc(r.name)}</b><div class="mu">${esc(r.category)} · مالك: ${esc(r.owner_phone||'-')} · عمولة ${esc(r.commission_pct)}%</div></div><div class="row"><span>معتمد: ${yn(r.is_approved)}</span><button class="b ${r.is_approved?'r':''}" onclick="act(()=>api('/admin/restaurants/${r.id}','PATCH',{is_approved:${!r.is_approved}}))">${r.is_approved?'تعليق':'اعتماد'}</button><button class="b o" onclick="com(${r.id},${Number(r.commission_pct)})">العمولة</button></div></div>`).join('')||'<p class="mu">لا مطاعم.</p>'}
+ if(tab=='couriers'){const d=await api('/admin/couriers');h=`<h2>المندوبون</h2>`+d.map(c=>`<div class="card row"><div><b>${esc(c.name||c.phone)}</b><div class="mu">${esc(c.phone)} · ${esc(c.vehicle||'-')} · متصل: ${yn(c.is_online)}</div></div><div class="row"><span>معتمد: ${yn(c.is_approved)}</span><button class="b ${c.is_approved?'r':''}" onclick="act(()=>api('/admin/couriers/${esc(c.id)}','PATCH',{is_approved:${!c.is_approved}}))">${c.is_approved?'إيقاف':'اعتماد'}</button></div></div>`).join('')||'<p class="mu">لا مندوبين. حوّل مستخدماً إلى مندوب من تبويب المستخدمين.</p>'}
+ if(tab=='orders'){const d=await api('/admin/orders?status='+st);h=`<h2>الطلبات</h2><select onchange="st=this.value;show()"><option value="">كل الحالات</option>${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${st==k?'selected':''}>${v}</option>`).join('')}</select><div style="height:8px"></div>`+d.map(o=>`<div class="card row"><div><b>#${o.id}</b> ${esc(o.restaurant)}<div class="mu">${esc(o.customer)} · ${f(o.total)} · ${o.pay_method=='cash'?'نقداً':'محفظة'}</div></div><div class="row"><span class="tag">${ST[o.status]}</span>${['new','accepted'].includes(o.status)?`<button class="b r" onclick="if(confirm('إلغاء الطلب #${o.id}؟'))act(()=>api('/orders/${o.id}/status','POST',{status:'cancelled'}))">إلغاء</button>`:''}</div></div>`).join('')||'<p class="mu">لا طلبات.</p>'}
+ if(tab=='users'){const d=await api('/admin/users?q='+encodeURIComponent(q||''));h=`<h2>المستخدمون</h2><input placeholder="بحث بالهاتف أو الاسم" value="${esc(q)}" onchange="q=this.value;show()"><div style="height:8px"></div>`+d.map(u=>`<div class="card row"><div><b>${esc(u.name||u.phone)}</b><div class="mu">${esc(u.phone)} · ${esc(u.role)}</div></div>${u.role=='admin'?'<span class="tag">إدارة</span>':`<div class="row"><select onchange="act(()=>api('/admin/users/${esc(u.id)}/role','POST',{role:this.value}))">${['customer','restaurant','courier'].map(r=>`<option value="${r}" ${u.role==r?'selected':''}>${{customer:'عميل',restaurant:'مطعم',courier:'مندوب'}[r]}</option>`).join('')}</select><button class="b ${u.is_active?'r':''}" onclick="act(()=>api('/admin/users/${esc(u.id)}','PATCH',{is_active:${!u.is_active}}))">${u.is_active?'تعليق':'تفعيل'}</button></div>`}</div>`).join('')||'<p class="mu">لا نتائج.</p>'}
+ if(tab=='coupons'){const d=await api('/admin/coupons');h=`<h2>كوبون جديد</h2><div class="card row"><input id="cc" placeholder="الكود مثل ZOL10" size="10"><input id="cp" placeholder="نسبة %" size="6" inputmode="numeric"><input id="ca" placeholder="أو مبلغ" size="6" inputmode="numeric"><button class="b" onclick="addC()">إضافة</button></div><h2>الكوبونات</h2>`+d.map(c=>`<div class="card row"><b>${esc(c.code)}</b><span>${c.pct?c.pct+'%':f(c.amount)}</span><span class="mu">استُخدم ${c.used}${c.max_uses?' من '+c.max_uses:''}</span></div>`).join('')+`<p class="mu">ملاحظة: تطبيق الكوبون على الطلب سيُربط في خطوة لاحقة.</p>`}
+ if(tab=='cities'){const d=await api('/admin/cities');h=`<h2>المدن ومناطق التوصيل</h2>`+d.map(c=>`<div class="card"><div class="row"><div><b>${esc(c.name)}</b> <span class="mu">${esc(c.state)}</span></div><div class="row"><span>مفعّلة: ${yn(c.is_active)}</span><button class="b ${c.is_active?'r':''}" onclick="act(()=>api('/admin/cities/${c.id}','PATCH',{is_active:${!c.is_active}}))">${c.is_active?'إيقاف':'تفعيل'}</button></div></div>${(c.zones||[]).map(z=>`<div class="row mu" style="margin-top:6px"><span>${esc(z.name)}: ${f(z.base_fee)}</span><button class="b o" onclick="fee(${z.id},${Number(z.base_fee)})">تعديل الرسوم</button></div>`).join('')}</div>`).join('')}
+ if(tab=='audit'){const d=await api('/admin/audit');h=`<h2>سجل العمليات</h2>`+d.map(a=>`<div class="card"><b>${esc(a.action)}</b> <span class="mu">${esc(a.entity)} ${esc(a.entity_id)} · ${esc(a.admin||'-')} · ${new Date(a.at).toLocaleString('ar-EG')}</span></div>`).join('')||'<p class="mu">لا عمليات بعد.</p>'}
+ draw(h)}catch(e){if(e)draw(body)}}
+let q='';
+function com(id,cur){const v=prompt('عمولة المطعم % (0 - 50)',cur);if(v!==null)act(()=>api('/admin/restaurants/'+id,'PATCH',{commission_pct:Number(v)}))}
+function fee(id,cur){const v=prompt('رسوم التوصيل بالجنيه',cur);if(v!==null)act(()=>api('/admin/zones/'+id,'PATCH',{base_fee:Number(v)}))}
+function addC(){const p=parseInt($('#cp').value)||undefined,a=parseInt($('#ca').value)||undefined;act(()=>api('/admin/coupons','POST',{code:$('#cc').value.trim().toUpperCase(),pct:p,amount:a}))}
+show();
+</script></body></html>
