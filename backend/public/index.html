@@ -3,62 +3,124 @@
 <style>
 :root{--g:#0F4D3A;--gold:#C9A24B;--bg:#FAF6EC;--c:#fff;--tx:#1B1B1A;--mu:#6b6b63;--ln:#e8e1cf}
 @media(prefers-color-scheme:dark){:root{--bg:#121513;--c:#1c211e;--tx:#f3efe3;--mu:#a5a597;--ln:#2c332f;--g:#1d7a5c}}
-*{box-sizing:border-box;margin:0}body{font-family:Tajawal,Tahoma,sans-serif;background:var(--bg);color:var(--tx);max-width:520px;margin:auto;padding-bottom:80px}
-header{background:var(--g);color:#fff;padding:14px;display:flex;justify-content:space-between;font-weight:800}header a{color:var(--gold);font-weight:400;font-size:13px}
+*{box-sizing:border-box;margin:0}body{font-family:Tajawal,Tahoma,Arial,sans-serif;background:var(--bg);color:var(--tx);max-width:520px;margin:auto;padding-bottom:90px}
+header{background:var(--g);color:#fff;padding:14px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:20px}header a{color:var(--gold);font-weight:400;font-size:14px;text-decoration:none}
 main{padding:14px}.card{background:var(--c);border:1px solid var(--ln);border-radius:14px;padding:12px;margin-bottom:10px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px}.mu{color:var(--mu);font-size:13px}
-button{border:0;border-radius:10px;padding:10px 14px;background:var(--g);color:#fff;font:inherit;font-weight:700}button.g{background:var(--gold);color:#1B1B1A}button.o{background:none;color:var(--g);border:1px solid var(--g)}button.f{width:100%;margin-top:8px}
-input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--ln);background:var(--c);color:var(--tx);font:inherit;margin:6px 0}
+button{border:0;border-radius:10px;padding:10px 14px;background:var(--g);color:#fff;font:inherit;font-weight:700;cursor:pointer}button.g{background:var(--gold);color:#1B1B1A}button.o{background:none;color:var(--g);border:1px solid var(--g)}button.f{width:100%;margin-top:8px;padding:13px}
+input[type=text],input[type=tel],input:not([type]){width:100%;padding:12px;border-radius:10px;border:1px solid var(--ln);background:var(--c);color:var(--tx);font:inherit;margin:6px 0}
 .tag{font-size:12px;padding:2px 8px;border-radius:8px;border:1px solid var(--ln)}h2{font-size:18px;margin:12px 0 8px}
+.err{background:#fdecea;color:#b3402f;border-radius:10px;padding:10px;margin-bottom:10px}
+.empty{text-align:center;color:var(--mu);padding:30px 10px}
+.step{display:flex;gap:10px;align-items:center;padding:6px 0;color:var(--mu)}.step i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ln);flex:none}
+.step.done{color:var(--tx)}.step.done i{background:var(--g);border-color:var(--g)}.step.cur{color:var(--g);font-weight:700}.step.cur i{background:var(--gold);border-color:var(--gold)}
+.bar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:auto;padding:10px 14px;background:var(--bg);border-top:1px solid var(--ln)}
 </style></head><body>
-<header><span>زول فود</span><a href="#" id="out"></a></header><main id="m"></main>
+<header><span>زول فود</span><a href="#" id="out"></a></header>
+<main id="m"><p class="empty">جاري التحميل...</p></main>
+<div id="bar"></div>
 <script>
-let tok=null,role=null,view='home',rid=null,menu=[],cart={},cur=null,phone='',step='phone',pay='cash',addr='',err='';
-try{tok=localStorage.getItem('t');role=localStorage.getItem('r')}catch{}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f=n=>Number(n||0).toLocaleString('ar-EG')+' ج';
 const ST={new:'تم استلام الطلب',accepted:'المطعم أكّد الطلب',preparing:'جاري التجهيز',ready:'الطعام جاهز',picked_up:'المندوب في الطريق',delivered:'تم التسليم',cancelled:'ملغي'};
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const f=n=>Number(n).toLocaleString('ar-EG')+' ج',$=s=>document.querySelector(s);
-async function api(p,m='GET',b){const r=await fetch(p,{method:m,headers:{'Content-Type':'application/json',...(tok?{Authorization:'Bearer '+tok}:{})},body:b?JSON.stringify(b):undefined});
- const j=await r.json().catch(()=>({}));if(r.status==401&&tok){logout();return{}}if(!r.ok){err=j.error||'خطأ';throw new Error(err)}return j}
-function logout(){tok=role=null;try{localStorage.clear()}catch{}step='phone';draw()}
+const FLOW=['new','accepted','preparing','ready','picked_up','delivered'];
+const E={invalid_phone:'رقم الهاتف غير صحيح (مثال: +249912345678)',otp_wrong:'الرمز غير صحيح',otp_expired:'انتهت صلاحية الرمز، اطلب رمزاً جديداً',insufficient_balance:'رصيد المحفظة لا يكفي',restaurant_unavailable:'المطعم غير متاح الآن',below_min_order:'الطلب أقل من الحد الأدنى',suspended:'هذا الحساب موقوف',courier_not_approved:'حسابك قيد المراجعة',not_your_order:'الطلب مع مندوب آخر',invalid_transition:'تغيّرت حالة الطلب، حدّث الصفحة',network:'تعذّر الاتصال بالخادم. تأكد من الإنترنت وحاول مجدداً',forbidden:'غير مسموح لهذا الحساب'};
+const S={tok:null,role:null,view:'home',rests:null,menu:null,rid:null,cart:{},cur:null,ords:null,rows:null,cour:null,adm:null,err:'',step:'phone',phone:'',pay:'cash',addr:'',busy:false};
+try{S.tok=localStorage.getItem('t');S.role=localStorage.getItem('r')}catch(e){}
+
+async function api(p,m,b){
+  let r;
+  try{r=await fetch(p,{method:m||'GET',headers:Object.assign({'Content-Type':'application/json'},S.tok?{Authorization:'Bearer '+S.tok}:{}),body:b?JSON.stringify(b):undefined})}
+  catch(e){throw new Error('network')}
+  const j=await r.json().catch(()=>({}));
+  if(r.status===401&&S.tok){logout();throw new Error('unauthorized')}
+  if(!r.ok)throw new Error(j.error||'error');
+  return j}
+function logout(){S.tok=S.role=null;S.step='phone';S.view='home';S.rests=S.ords=S.rows=S.cour=S.adm=null;try{localStorage.clear()}catch(e){}draw()}
 $('#out').onclick=e=>{e.preventDefault();logout()};
-const go=fn=>async(...a)=>{try{err='';await fn(...a)}catch(e){}draw()};
-const doOtp=go(async()=>{phone=$('#ph').value;await api('/auth/otp','POST',{phone});step='code'});
-const doVerify=go(async()=>{const j=await api('/auth/verify','POST',{phone,code:$('#cd').value});tok=j.token;role=j.role;try{localStorage.setItem('t',tok);localStorage.setItem('r',role)}catch{}view='home';await load()});
-let data=null;
+async function run(fn){
+  if(S.busy)return;S.busy=true;S.err='';
+  try{await fn()}catch(e){S.err=E[e.message]||'تعذّر تنفيذ العملية، حاول مرة أخرى'}
+  S.busy=false;draw()}
+
 async function load(){
- if(!tok)return;
- try{
-  if(role=='customer'){if(view=='home')data=await api('/restaurants');if(view=='orders')data=await api('/orders/mine');if(view=='track')cur=await api('/orders/'+cur.id)}
-  if(role=='restaurant')data=await api('/restaurant/orders');
-  if(role=='courier')data={a:await api('/courier/available'),m:await api('/courier/mine')};
-  if(role=='admin')data=await api('/admin/stats');
- }catch{}draw()}
-setInterval(()=>{if(tok&&!['menu','cart'].includes(view))load()},5000);
-const open=go(async id=>{rid=id;menu=await api('/restaurants/'+id+'/menu');view='menu'});
-const add=(id,d)=>{cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];draw()};
-const total=()=>menu.reduce((a,m)=>a+m.price*(cart[m.id]||0),0);
-const place=go(async()=>{if(!addr.trim()){err='اكتب العنوان';return}
- const items=Object.keys(cart).map(id=>({itemId:+id,qty:cart[id]}));
- const j=await api('/orders','POST',{restaurantId:rid,items,address:addr,payMethod:pay,idemKey:crypto.randomUUID()});
- cart={};cur={id:j.orderId};view='track';cur=await api('/orders/'+j.orderId)});
-const st=go(async(id,s)=>{await api(`/orders/${id}/status`,'POST',{status:s});await load()});
-const E={invalid_phone:'رقم الهاتف غير صحيح',otp_wrong:'الرمز غير صحيح',otp_expired:'انتهت صلاحية الرمز',insufficient_balance:'رصيد المحفظة لا يكفي',restaurant_unavailable:'المطعم غير متاح'};
+  if(!S.tok)return draw();
+  try{
+    if(S.role==='customer'){
+      if(S.view==='home')S.rests=await api('/restaurants');
+      else if(S.view==='orders')S.ords=await api('/orders/mine');
+      else if(S.view==='track'&&S.cur)S.cur=await api('/orders/'+S.cur.id);
+    }else if(S.role==='restaurant')S.rows=await api('/restaurant/orders');
+    else if(S.role==='courier')S.cour={a:await api('/courier/available'),m:await api('/courier/mine')};
+    else if(S.role==='admin')S.adm=await api('/admin/stats');
+    S.err='';
+  }catch(e){if(e.message!=='unauthorized')S.err=E[e.message]||'تعذّر تحميل البيانات'}
+  draw()}
+
+/* ---- login ---- */
+function otp(){S.phone=($('#ph').value||'').trim();run(async()=>{await api('/auth/otp','POST',{phone:S.phone});S.step='code'})}
+function verify(){run(async()=>{
+  const j=await api('/auth/verify','POST',{phone:S.phone,code:($('#cd').value||'').trim()});
+  S.tok=j.token;S.role=j.role;S.view='home';try{localStorage.setItem('t',S.tok);localStorage.setItem('r',S.role)}catch(e){}
+  await load()})}
+function rLogin(){
+  return '<h2>تسجيل الدخول</h2><div class="card">'+(S.step==='phone'
+   ?'<div class="mu">اكتب رقم هاتفك بصيغة دولية</div><input id="ph" type="tel" placeholder="+249912345678" value="'+esc(S.phone)+'"><button class="f" onclick="otp()">إرسال الرمز</button>'
+   :'<div class="mu">أرسلنا رمزاً إلى '+esc(S.phone)+'</div><input id="cd" type="tel" placeholder="رمز التحقق" inputmode="numeric"><button class="f" onclick="verify()">دخول</button><button class="o f" onclick="S.step=\'phone\';draw()">تغيير الرقم</button><p class="mu" style="margin-top:8px">وضع التجربة: الرمز يظهر في تبويب Logs في Render لأن خدمة الرسائل غير مربوطة بعد.</p>')+'</div>'}
+
+/* ---- customer ---- */
+const total=()=>(S.menu||[]).reduce((a,m)=>a+m.price*(S.cart[m.id]||0),0);
+const count=()=>Object.values(S.cart).reduce((a,b)=>a+b,0);
+function nav(v){S.view=v;S.err='';load()}
+function openRest(id){run(async()=>{if(S.rid!==id)S.cart={};S.menu=await api('/restaurants/'+id+'/menu');S.rid=id;S.view='menu'})}
+function add(id,d){S.cart[id]=(S.cart[id]||0)+d;if(S.cart[id]<=0)delete S.cart[id];draw()}
+function place(){run(async()=>{
+  if(!S.addr.trim())throw new Error('addr');
+  const items=Object.keys(S.cart).map(id=>({itemId:+id,qty:S.cart[id]}));
+  const key=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random();
+  const j=await api('/orders','POST',{restaurantId:S.rid,items,address:S.addr,payMethod:S.pay,idemKey:key});
+  S.cart={};S.cur=await api('/orders/'+j.orderId);S.view='track'})}
+E.addr='اكتب عنوان التوصيل';
+function rCust(){
+  const v=S.view;
+  if(v==='menu'){
+    if(!S.menu)return '<p class="empty">جاري التحميل...</p>';
+    return '<button class="o" onclick="nav(\'home\')">رجوع للمطاعم</button><h2>القائمة</h2>'+
+     (S.menu.map(m=>'<div class="card row"><div><b>'+esc(m.name)+'</b><div class="mu">'+f(m.price)+'</div></div><div class="row">'+(S.cart[m.id]?'<button class="o" onclick="add('+m.id+',-1)">−</button><b>'+S.cart[m.id]+'</b>':'')+'<button onclick="add('+m.id+',1)">+</button></div></div>').join('')||'<p class="empty">لا توجد أصناف في هذا المطعم بعد.</p>')}
+  if(v==='cart')return '<h2>تأكيد الطلب</h2><div class="card"><div class="row"><span>المنتجات</span><b>'+f(total())+'</b></div><div class="mu">رسوم التوصيل والخدمة يحسبها الخادم وتظهر بعد التأكيد</div></div><div class="card"><div class="mu">عنوان التوصيل</div><input type="text" id="ad" placeholder="مثال: أمدرمان، الموردة، قرب الصيدلية" value="'+esc(S.addr)+'" oninput="S.addr=this.value"><label style="display:block;padding:6px 0"><input type="radio" name="p" '+(S.pay==='cash'?'checked':'')+' onchange="S.pay=\'cash\'"> الدفع عند الاستلام</label><label style="display:block;padding:6px 0"><input type="radio" name="p" '+(S.pay==='wallet'?'checked':'')+' onchange="S.pay=\'wallet\'"> المحفظة</label></div><button class="g f" onclick="place()">تأكيد الطلب</button><button class="o f" onclick="S.view=\'menu\';draw()">رجوع</button>';
+  if(v==='track'){
+    const o=S.cur;if(!o||!o.status)return '<p class="empty">جاري التحميل...</p>';
+    const i=FLOW.indexOf(o.status);
+    return '<h2>طلب #'+esc(o.id)+'</h2><div class="card">'+(o.status==='cancelled'?'<b>تم إلغاء الطلب</b>':FLOW.map((s,k)=>'<div class="step '+(k<i||o.status==='delivered'?'done':k===i?'cur':'')+'"><i></i>'+ST[s]+'</div>').join(''))+'</div><div class="card">'+(o.items||[]).map(x=>'<div class="row mu"><span>'+x.qty+'× '+esc(x.name)+'</span><span>'+f(x.unit_price*x.qty)+'</span></div>').join('')+'<div class="row"><span>التوصيل والخدمة</span><span>'+f((o.delivery_fee||0)+(o.service_fee||0))+'</span></div><div class="row"><b>الإجمالي</b><b>'+f(o.total)+'</b></div><div class="mu">الدفع: '+(o.pay_method==='cash'?'عند الاستلام':'المحفظة')+'</div></div><button class="f" onclick="nav(\'home\')">الرئيسية</button>'}
+  if(v==='orders')return '<button class="o" onclick="nav(\'home\')">رجوع</button><h2>طلباتي</h2>'+(S.ords===null?'<p class="empty">جاري التحميل...</p>':S.ords.map(o=>'<div class="card row" style="cursor:pointer" onclick="S.cur={id:'+o.id+'};nav(\'track\')"><b>#'+o.id+'</b><span class="tag">'+ST[o.status]+'</span><span>'+f(o.total)+'</span></div>').join('')||'<p class="empty">لا توجد طلبات بعد.</p>');
+  // home
+  if(S.rests===null)return '<p class="empty">جاري التحميل...</p>';
+  return '<h2>المطاعم</h2>'+(S.rests.map(r=>'<div class="card" style="cursor:pointer" onclick="openRest('+r.id+')"><b>'+esc(r.name)+'</b><div class="mu">'+esc(r.category)+' · ★ '+esc(r.rating)+' · '+esc(r.prep_minutes)+' دقيقة</div></div>').join('')||'<p class="empty">لا توجد مطاعم متاحة بعد. المطاعم تظهر بعد اعتمادها من الإدارة.</p>')+'<button class="o f" onclick="nav(\'orders\')">طلباتي</button>'}
+
+/* ---- restaurant / courier / admin ---- */
+function st(id,s){run(async()=>{await api('/orders/'+id+'/status','POST',{status:s});await load()})}
+function rRest(){
+  const N={new:['accepted','قبول'],accepted:['preparing','بدء التجهيز'],preparing:['ready','الطعام جاهز']};
+  if(S.rows===null)return '<p class="empty">جاري التحميل...</p>';
+  return '<h2>طلبات المطعم</h2>'+(S.rows.map(o=>'<div class="card"><div class="row"><b>#'+o.id+'</b><span class="tag">'+ST[o.status]+'</span></div>'+(o.items||[]).map(i=>'<div class="mu">'+i.qty+'× '+esc(i.name)+'</div>').join('')+(N[o.status]?'<button class="f" onclick="st('+o.id+',\''+N[o.status][0]+'\')">'+N[o.status][1]+'</button>':'')+(o.status==='new'?'<button class="o f" onclick="st('+o.id+',\'cancelled\')">رفض</button>':'')+'</div>').join('')||'<p class="empty">لا توجد طلبات بعد.</p>')}
+function rCour(){
+  if(!S.cour)return '<p class="empty">جاري التحميل...</p>';
+  return '<h2>طلبات متاحة</h2>'+(S.cour.a.map(o=>'<div class="card"><b>#'+o.id+'</b> '+esc(o.restaurant_name)+' ← '+esc(o.address_text)+'<div class="mu">عائد التوصيل '+f(o.delivery_fee)+'</div><button class="f" onclick="st('+o.id+',\'picked_up\')">استلام الطلب</button></div>').join('')||'<p class="empty">لا توجد طلبات جاهزة الآن.</p>')+
+   '<h2>قيد التوصيل</h2>'+(S.cour.m.map(o=>'<div class="card"><b>#'+o.id+'</b> إلى '+esc(o.address_text)+'<div class="mu">'+(o.pay_method==='cash'&&o.pay_status!=='paid'?'حصّل '+f(o.total)+' نقداً':'مدفوع')+'</div><button class="g f" onclick="st('+o.id+',\'delivered\')">تأكيد التسليم</button></div>').join('')||'<p class="empty">لا يوجد طلب قيد التوصيل.</p>')}
+function rAdmin(){
+  const d=S.adm;if(!d)return '<p class="empty">جاري التحميل...</p>';
+  return '<h2>الإدارة</h2><div class="card">الطلبات: <b>'+d.orders+'</b></div><div class="card">المبيعات: <b>'+f(d.sales)+'</b></div><div class="card">إيرادات المنصة: <b>'+f(d.revenue)+'</b></div><div class="card">معدل الإلغاء: <b>'+d.cancel_rate+'%</b></div><a href="/admin.html"><button class="f">فتح لوحة الإدارة الكاملة</button></a>'}
+
 function draw(){
- $('#out').textContent=tok?'خروج':'';
- let h='';
- if(!tok){h=`<h2>تسجيل الدخول</h2>`+(step=='phone'?`<input id="ph" placeholder="رقم الهاتف +249..." inputmode="tel"><button class="f" onclick="doOtp()">إرسال الرمز</button>`:`<input id="cd" placeholder="رمز التحقق" inputmode="numeric"><button class="f" onclick="doVerify()">دخول</button>`)}
- else if(role=='customer'){
-  if(view=='menu')h=`<button class="o" onclick="view='home';load()">رجوع</button><h2>القائمة</h2>${menu.map(m=>`<div class="card row"><div><b>${esc(m.name)}</b><div class="mu">${f(m.price)}</div></div><div class="row">${cart[m.id]?`<button class="o" onclick="add(${m.id},-1)">−</button>${cart[m.id]}`:''}<button onclick="add(${m.id},1)">+</button></div></div>`).join('')}${total()?`<button class="g f" onclick="view='cart';draw()">السلة · ${f(total())}</button>`:''}`;
-  else if(view=='cart')h=`<h2>تأكيد الطلب</h2><div class="card"><div class="row"><span>المنتجات</span><span>${f(total())}</span></div><div class="mu">رسوم التوصيل والخدمة يحسبها الخادم وتظهر بعد التأكيد</div></div><input placeholder="عنوان التوصيل" value="${esc(addr)}" oninput="addr=this.value"><div class="card"><label><input type="radio" name="p" ${pay=='cash'?'checked':''} onchange="pay='cash'" style="width:auto"> عند الاستلام</label><br><label><input type="radio" name="p" ${pay=='wallet'?'checked':''} onchange="pay='wallet'" style="width:auto"> المحفظة</label></div><button class="g f" onclick="place()">تأكيد الطلب</button><button class="o f" onclick="view='menu';draw()">رجوع</button>`;
-  else if(view=='track'&&cur)h=`<h2>طلب #${cur.id}</h2><div class="card"><b>${ST[cur.status]||'...'}</b>${(cur.items||[]).map(i=>`<div class="row mu"><span>${i.qty}× ${esc(i.name)}</span><span>${f(i.unit_price*i.qty)}</span></div>`).join('')}<div class="row"><span>التوصيل</span><span>${f(cur.delivery_fee||0)}</span></div><div class="row"><b>الإجمالي</b><b>${f(cur.total||0)}</b></div></div><button class="f" onclick="view='home';load()">الرئيسية</button>`;
-  else if(view=='orders')h=`<h2>طلباتي</h2>${(data||[]).map(o=>`<div class="card row" onclick="cur={id:${o.id}};view='track';load()"><span>#${o.id}</span><span class="tag">${ST[o.status]}</span><span>${f(o.total)}</span></div>`).join('')||'<p class="mu">لا طلبات بعد.</p>'}`;
-  else h=`<h2>المطاعم</h2>${(data||[]).map(r=>`<div class="card row" onclick="open(${r.id})"><div><b>${esc(r.name)}</b><div class="mu">${esc(r.category)} · ★ ${r.rating} · ${r.prep_minutes} د</div></div></div>`).join('')}<button class="o f" onclick="view='orders';load()">طلباتي</button>`}
- else if(role=='restaurant'){const N={new:['accepted','قبول'],accepted:['preparing','بدء التجهيز'],preparing:['ready','الطعام جاهز']};
-  h=`<h2>طلبات المطعم</h2>${(data||[]).map(o=>`<div class="card"><div class="row"><b>#${o.id}</b><span class="tag">${ST[o.status]}</span></div>${(o.items||[]).map(i=>`<div class="mu">${i.qty}× ${esc(i.name)}</div>`).join('')}${N[o.status]?`<button class="f" onclick="st(${o.id},'${N[o.status][0]}')">${N[o.status][1]}</button>`:''}${o.status=='new'?`<button class="o f" onclick="st(${o.id},'cancelled')">رفض</button>`:''}</div>`).join('')||'<p class="mu">لا طلبات.</p>'}`}
- else if(role=='courier')h=`<h2>طلبات متاحة</h2>${(data?.a||[]).map(o=>`<div class="card"><b>#${o.id}</b> ← ${esc(o.address_text)}<button class="f" onclick="st(${o.id},'picked_up')">استلام الطلب</button></div>`).join('')||'<p class="mu">لا شيء جاهز.</p>'}<h2>قيد التوصيل</h2>${(data?.m||[]).map(o=>`<div class="card"><b>#${o.id}</b> إلى ${esc(o.address_text)}<div class="mu">${o.pay_method=='cash'?'حصّل '+f(o.total):'مدفوع'}</div><button class="g f" onclick="st(${o.id},'delivered')">تأكيد التسليم</button></div>`).join('')}`;
- else if(role=='admin'&&data)h=`<h2>الإدارة</h2><div class="card">الطلبات: ${data.orders}</div><div class="card">المبيعات: ${f(data.sales)}</div><div class="card">إيرادات المنصة: ${f(data.revenue)}</div><div class="card">معدل الإلغاء: ${data.cancel_rate}%</div>`;
- if(err)h+=`<p style="color:#c0392b;margin-top:10px">${esc(E[err]||err)}</p>`;
- $('#m').innerHTML=h}
-draw();load();
+  $('#out').textContent=S.tok?'خروج':'';
+  let h;
+  try{
+    h=!S.tok?rLogin():S.role==='customer'?rCust():S.role==='restaurant'?rRest():S.role==='courier'?rCour():rAdmin();
+  }catch(e){h='<p class="empty">حدث خطأ في عرض الصفحة. اضغط خروج ثم ادخل من جديد.</p>';console.error(e)}
+  $('#m').innerHTML=(S.err?'<div class="err">'+esc(S.err)+'</div>':'')+h;
+  $('#bar').innerHTML=(S.tok&&S.role==='customer'&&S.view==='menu'&&count()>0)?'<div class="bar"><button class="g f" style="margin:0" onclick="S.view=\'cart\';draw()">عرض السلة ('+count()+') · '+f(total())+'</button></div>':''}
+
+setInterval(()=>{if(S.tok&&!S.busy&&S.view!=='menu'&&S.view!=='cart')load()},5000);
+load();
 </script></body></html>
