@@ -12,7 +12,8 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const SECRET = process.env.JWT_SECRET;
 if (!SECRET) throw new Error('JWT_SECRET is required');
 const app = express();
-app.use(helmet(), cors(), express.json({ limit: '100kb' }));
+// The bundled web pages use inline scripts, so allow them (user text is escaped in the pages).
+app.use(helmet({ contentSecurityPolicy: { directives: { ...helmet.contentSecurityPolicy.getDefaultDirectives(), 'script-src': ["'self'", "'unsafe-inline'"], 'script-src-attr': ["'unsafe-inline'"] } } }), cors(), express.json({ limit: '100kb' }));
 app.use(rateLimit({ windowMs: 60_000, limit: Number(process.env.GLOBAL_LIMIT) || 120 }));
 const wrap = fn => (req, res) => fn(req, res).catch(e => { console.error(e); res.status(e.status || 500).json({ error: e.status ? e.message : 'server_error' }); });
 const fail = (status, message) => Object.assign(new Error(message), { status });
