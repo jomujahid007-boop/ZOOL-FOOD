@@ -6,12 +6,14 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import pg from 'pg';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import admin from 'firebase-admin';
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const SECRET = process.env.JWT_SECRET;
 if (!SECRET) throw new Error('JWT_SECRET is required');
 const app = express();
+app.set('trust proxy', 1); // behind Render's proxy: use the real client IP for rate limiting
 // The bundled web pages use inline scripts, so allow them (user text is escaped in the pages).
 app.use(helmet({ contentSecurityPolicy: { directives: { ...helmet.contentSecurityPolicy.getDefaultDirectives(), 'script-src': ["'self'", "'unsafe-inline'"], 'script-src-attr': ["'unsafe-inline'"] } } }), cors(), express.json({ limit: '100kb' }));
 app.use(rateLimit({ windowMs: 60_000, limit: Number(process.env.GLOBAL_LIMIT) || 120 }));
@@ -326,16 +328,19 @@ app.get('/admin/audit', A, wrap(async (req, res) => {
   res.json((await pool.query('SELECT a.id,a.action,a.entity,a.entity_id,a.meta,a.at,u.phone admin FROM admin_audit_logs a LEFT JOIN users u ON u.id=a.admin_id ORDER BY a.id DESC LIMIT 100')).rows);
 }));
 
-app.use(express.static('public'));
+app.use(express.static(fileURLToPath(new URL('./public', import.meta.url))));
 
-// First start on an empty database: create tables automatically (no manual SQL step).
+// Startup: create tables on an empty database, and load demo data when there are no restaurants yet.
+// Demo data can be disabled with SEED_DEMO=false.
 async function bootstrap() {
-  const { rows } = await pool.query("SELECT to_regclass('public.users') AS t");
-  if (rows[0].t) return;
   const run = f => pool.query(fs.readFileSync(new URL(f, import.meta.url), 'utf8'));
-  await run('./schema.sql'); await run('./migration_002.sql');
-  if (process.env.SEED_DEMO === 'true') await run('./seed.sql');
-  console.log('database initialised');
+  const { rows } = await pool.query("SELECT to_regclass('public.users') AS t");
+  if (!rows[0].t) { await run('./schema.sql'); console.log('schema created'); }
+  await run('./migration_002.sql'); // idempotent
+  if (process.env.SEED_DEMO !== 'false') {
+    const n = (await pool.query('SELECT count(*)::int AS n FROM restaurants')).rows[0].n;
+    if (n === 0) { await run('./seed.sql'); console.log('demo data loaded'); }
+  }
 }
 bootstrap().then(() => app.listen(process.env.PORT || 3000, () => console.log('ZOL FOOD API up')))
   .catch(e => { console.error('startup failed', e); process.exit(1); });
