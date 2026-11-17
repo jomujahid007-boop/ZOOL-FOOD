@@ -74,6 +74,11 @@ const auth = (...roles) => (req, res, next) => {
 };
 
 // ---- Public catalog ----
+const SERVICE_FEE = 500;
+app.get('/config', wrap(async (req, res) => {
+  const z = (await pool.query('SELECT base_fee FROM delivery_zones WHERE is_active ORDER BY id LIMIT 1')).rows[0];
+  res.json({ deliveryFee: z ? z.base_fee : 2000, serviceFee: SERVICE_FEE });
+}));
 app.get('/restaurants', wrap(async (req, res) => {
   const { rows } = await pool.query('SELECT id,name,category,logo_url,rating,prep_minutes,is_open FROM restaurants WHERE is_approved ORDER BY rating DESC');
   res.json(rows);
@@ -108,7 +113,7 @@ app.post('/orders', auth('customer'), wrap(async (req, res) => {
     if (subtotal < r.min_order) throw fail(400, 'below_min_order');
     const fee = (await c.query('SELECT base_fee FROM delivery_zones WHERE id=$1 AND is_active', [zoneId])).rows[0]?.base_fee;
     if (fee == null) throw fail(400, 'zone_unavailable');
-    const service = 500, total = subtotal + fee + service, commission = Math.round(subtotal * r.commission_pct / 100);
+    const service = SERVICE_FEE, total = subtotal + fee + service, commission = Math.round(subtotal * r.commission_pct / 100);
     const o = (await c.query(
       `INSERT INTO orders(customer_id,restaurant_id,address_text,zone_id,subtotal,delivery_fee,service_fee,total,commission,pay_method,notes,idem_key,lat,lng)
        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id`,
