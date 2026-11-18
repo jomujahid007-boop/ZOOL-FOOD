@@ -183,3 +183,18 @@ test('admin: commission validation, audit log, admin accounts protected', async 
   const next = await order(T.cust); // new orders use the new commission
   assert.equal((await row('SELECT commission FROM orders WHERE id=$1', [next.body.orderId])).commission, 2700); // 15% of 18000
 });
+
+test('customer cancel refunds wallet and is owner-only; review after delivery is one-time', async () => {
+  const bal = async () => (await row('SELECT balance FROM wallets WHERE user_id=$1', [uid(T.cust)])).balance;
+  const before = await bal();
+  const w = await order(T.cust, { payMethod: 'wallet' });
+  assert.equal(w.status, 201);
+  assert.equal((await call('POST', `/orders/${w.body.orderId}/cancel`, null, T.cust2)).status, 404);
+  assert.equal((await call('POST', `/orders/${w.body.orderId}/cancel`, null, T.cust)).status, 200);
+  assert.equal(await bal(), before);
+  assert.equal((await call('POST', `/orders/${w.body.orderId}/cancel`, null, T.cust)).status, 409);
+  assert.equal((await call('POST', `/orders/${ids.A}/review`, { stars: 9 }, T.cust)).status, 400);
+  assert.equal((await call('POST', `/orders/${ids.A}/review`, { stars: 5 }, T.cust2)).status, 404);
+  assert.equal((await call('POST', `/orders/${ids.A}/review`, { stars: 5 }, T.cust)).body.duplicate, false);
+  assert.equal((await call('POST', `/orders/${ids.A}/review`, { stars: 1 }, T.cust)).body.duplicate, true);
+});
